@@ -235,10 +235,7 @@ table {
   display: flex;
   text-decoration: none;
   color: #3e3e3e;
-  -webkit-transition-property: background-color;
-  transition-property: background-color;
-  -webkit-transition-duration: 0.3s;
-  transition-duration: 0.3s;
+  transition: background-color 0.3s;
   align-items: center;
   padding: 0.3em 0;
   border-bottom: hidden;
@@ -296,7 +293,6 @@ body {
   background: #2279de;
   outline: none;
   opacity: 0.9;
-  -webkit-transition: 0.2s;
   transition: opacity 0.2s;
   margin-left: 1.5em;
   margin-right: 1.5em;
@@ -319,3 +315,67 @@ input[type='range']::-webkit-slider-thumb:hover {
   background: #0171e7;
 }
 
+
+.ui-switcher {
+  background: #ffbe53;
+  box-shadow: inset 0px 0px 0px rgba(0, 0, 0, 0.25);
+  display: inline-block;
+  height: 13px;
+  width: 33px;
+  border-radius: 90px;
+  box-sizing: border-box;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  margin: 10px 4px 0 0;
+}
+
+.ui-switcher:before {
+  font-family: 'Teko';
+  font-size: 14px;
+  font-weight: 400;
+  color: white;
+  line-height: 1;
+  display: inline-block;
+  position: absolute;
+  top: 5px;
+  height: 12px;
+  width: 20px;
+  text-align: center;
+}
+
+.ui-switcher[aria-checked=false]:before {
+  right: 7px;
+  color: white !important;
+  background: #4e5050;
+}
+
+.ui-switcher[aria-checked=true]:before {
+  left: 7px;
+  background: #3a79ece8;
+}
+
+.ui-switcher[aria-checked=true] {
+  background: #a6c6de;
+}
+
+.ui-switcher:after {
+  background-color: #1c82ff;
+  content: '\0020';
+  display: inline-block;
+  position: absolute;
+  top: -3.5px;
+  height: 20px;
+  width: 20px;
+  border-radius: 50px;
+  transition: left 0.25s;
+}
+
+.ui-switcher[aria-checked=false]:after {
+  left: 0px;
+}
+
+.ui-switcher[aria-checked=true]:after {
+  left: 14px;
+}

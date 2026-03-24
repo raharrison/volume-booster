@@ -49,13 +49,9 @@
     }
 
     getCurrentTabId() {
-      return new Promise((resolve) => {
-        chrome.tabs.query({ active: true }, (tabs) => {
-          if (chrome.runtime.lastError) return;
-          this.currentTabId = tabs[0].id;
-          resolve(this.currentTabId);
-        });
-      });
+      const tabId = parseInt(new URLSearchParams(window.location.search).get('tabId'), 10);
+      this.currentTabId = tabId;
+      return Promise.resolve(tabId);
     }
 
     async initAudioContext() {
