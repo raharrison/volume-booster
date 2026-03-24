@@ -13,7 +13,7 @@
       "css": [ "css/app.css" ],
       "js": [ "js/content.js" ],
       "matches": [ "\u003Call_urls>" ],
-      "run_at": "document_start"
+      "run_at": "document_idle"
    } ],
    "description": "Boost your browser tab volume beyond 100% using the Web Audio API.",
    "host_permissions": [ "\u003Call_urls>" ],

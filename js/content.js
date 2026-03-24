@@ -3,21 +3,16 @@
     constructor() {
       this.maxVolume = 600;
       this.vizualizeContent = null;
-      this.updateVolume = this.updateVolume.bind(this);
       this.run();
     }
 
     run() {
-      this.initListeners();
-      this.createHtml();
-    }
-
-    initListeners() {
       chrome.runtime.onMessage.addListener((message) => {
         if (message.action === 'showGain') {
           this.updateVolume(message.volume);
         }
       });
+      this.createHtml();
     }
 
     createHtml() {

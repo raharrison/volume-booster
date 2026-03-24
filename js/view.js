@@ -6,25 +6,38 @@
       this.tabsTitle = document.querySelector('.tabs__title');
       this.tabsList = document.querySelector('.tabs__list');
       this.currentTabId = null;
-      this.storage = null;
       this.handleDocumentKeyPress = this.handleDocumentKeyPress.bind(this);
 
       chrome.tabs.onRemoved.addListener((tabId) => {
-        this.getStoredPopupId(tabId)
-          .then((windowId) => this.getWindowId(windowId))
-          .then((windowId) => chrome.windows.remove(windowId));
+        this.getStoredPopupId(tabId).then((windowId) => {
+          if (windowId) chrome.windows.remove(windowId);
+        });
       });
 
       this.run();
     }
 
+    initSwitcher() {
+      const checkbox = document.getElementById('insite-controller');
+      checkbox.style.display = 'none';
+      const switcher = document.createElement('div');
+      switcher.className = 'ui-switcher';
+      switcher.setAttribute('aria-checked', checkbox.checked);
+      checkbox.parentNode.insertBefore(switcher, checkbox.nextSibling);
+      switcher.addEventListener('click', () => {
+        checkbox.checked = !checkbox.checked;
+        switcher.setAttribute('aria-checked', checkbox.checked);
+        checkbox.dispatchEvent(new Event('click'));
+      });
+    }
+
     run() {
+      this.initSwitcher();
       return this.getCurrentTabId()
         .then(() => this.initAudioContext())
         .then(() => this.setVolumeValue(100))
         .then(() => this.initListeners())
-        .then(() => this.showPlayingTabs())
-        .then(() => this.initStorage());
+        .then(() => this.showPlayingTabs());
     }
 
     getStoredPopupId(tabId) {
@@ -35,18 +48,11 @@
       });
     }
 
-    getWindowId(windowId) {
-      return new Promise((resolve) => {
-        chrome.windows.get(windowId, (win) => resolve(win.id));
-      });
-    }
-
     getCurrentTabId() {
       return new Promise((resolve) => {
         chrome.tabs.query({ active: true }, (tabs) => {
           if (chrome.runtime.lastError) return;
           this.currentTabId = tabs[0].id;
-          this.currentTab = tabs[0];
           resolve(this.currentTabId);
         });
       });
@@ -104,22 +110,6 @@
       });
     }
 
-    initStorage() {
-      return new Promise((resolve) => {
-        chrome.storage.local.get({ usedIds: [], installationDate: null }, (data) => {
-          if (data.installationDate) {
-            this.storage = data;
-            this.storage.installationDate = JSON.parse(data.installationDate);
-          } else {
-            data.installationDate = new Date();
-            this.storage = data;
-            this.saveToStorage({ installationDate: JSON.stringify(data.installationDate) });
-          }
-          resolve();
-        });
-      });
-    }
-
     initListeners() {
       this.gainValueInput.addEventListener('input', (e) => this.handleGainChange(e));
       document.getElementById('insite-controller').addEventListener('click', (e) => this.handleGainChangeButton(e));
@@ -142,7 +132,7 @@
         this.volumeCurrent.textContent = volume;
         this.gainNode.gain.value = volume / 100;
         this.updateBadge(this.currentTabId, volume);
-        chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume });
+        chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume }, () => { chrome.runtime.lastError; });
         return;
       }
 
@@ -154,16 +144,16 @@
       this.volumeCurrent.textContent = volume;
       this.gainNode.gain.value = volume / 100;
       this.updateBadge(this.currentTabId, volume);
-      chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume });
+      chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume }, () => { chrome.runtime.lastError; });
     }
 
-    handleGainChangeButton(e) {
+    handleGainChangeButton() {
       const slider = this.gainValueInput;
       slider.disabled = !slider.disabled;
       this.setVolumeValue(100);
       this.gainNode.gain.value = 1;
       this.updateBadge(this.currentTabId, 100);
-      chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume: 100 });
+      chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume: 100 }, () => { chrome.runtime.lastError; });
     }
 
     updateBadge(tabId, volume) {
@@ -180,8 +170,5 @@
       });
     }
 
-    saveToStorage(data, callback = () => {}) {
-      chrome.storage.local.set(data, callback);
-    }
   };
 })();

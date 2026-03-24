@@ -144,12 +144,6 @@ table {
   margin: 9px auto 10px auto;
 }
 
-.header__icon {
-  vertical-align: text-bottom;
-  height: 41px;
-  width: 210px;
-}
-
 .header__icon__logo {
   vertical-align: text-bottom;
   height: 27px;
@@ -162,15 +156,6 @@ table {
   font-size: 19px;
   color: #607d8b;
   font-weight: 700;
-}
-
-.header__name {
-  display: inline-block;
-  font-family: 'Palanquin Dark', sans-serif;
-  color: #2891fe;
-  padding: 0 0.35em;
-  font-size: 1.4em;
-  font-weight: 540;
 }
 
 .header__description {
@@ -194,8 +179,6 @@ table {
 
 .volume-info {
   margin-top: 15px;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
   text-align: center;
   white-space: nowrap;
@@ -238,10 +221,6 @@ table {
   font-weight: 700;
 }
 
-.tabs {
-  /*padding: 7px 20px 10px 20px;*/
-}
-
 .tabs__title {
   margin-bottom: 7px;
   text-align: center;
@@ -252,16 +231,7 @@ table {
   font-size: 15px;
 }
 
-.line_tabs_title {
-  border-bottom: 1px solid #c1d3d9bf;
-  margin-left: 70px;
-  margin-right: 70px;
-  margin-bottom: 5px;
-}
-
 .tab {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
   text-decoration: none;
   color: #3e3e3e;
@@ -271,12 +241,6 @@ table {
   transition-duration: 0.3s;
   align-items: center;
   padding: 0.3em 0;
-  border-bottom: hidden;
-  border-radius: 10px;
-  height: 40px;
-}
-
-.tab:last-child {
   border-bottom: hidden;
   border-radius: 10px;
   height: 40px;
@@ -355,6 +319,3 @@ input[type='range']::-webkit-slider-thumb:hover {
   background: #0171e7;
 }
 
-input:checked {
-  display: none;
-}
