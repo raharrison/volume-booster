@@ -12,6 +12,11 @@
         this.getStoredPopupId(tabId).then((windowId) => {
           if (windowId) chrome.windows.remove(windowId);
         });
+        this.showPlayingTabs();
+      });
+
+      chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+        if ('audible' in changeInfo) this.showPlayingTabs();
       });
 
       this.run();
@@ -35,9 +40,25 @@
       this.initSwitcher();
       return this.getCurrentTabId()
         .then(() => this.initAudioContext())
-        .then(() => this.setVolumeValue(100))
+        .then(() => this.getSavedVolume())
+        .then((volume) => {
+          this.setVolumeValue(volume);
+          this.gainNode.gain.value = volume / 100;
+        })
         .then(() => this.initListeners())
         .then(() => this.showPlayingTabs());
+    }
+
+    getSavedVolume() {
+      return new Promise((resolve) => {
+        chrome.storage.local.get([`volume_${this.currentTabId}`], (result) => {
+          resolve(result[`volume_${this.currentTabId}`] ?? 100);
+        });
+      });
+    }
+
+    saveVolume(volume) {
+      chrome.storage.local.set({ [`volume_${this.currentTabId}`]: volume });
     }
 
     getStoredPopupId(tabId) {
@@ -56,18 +77,21 @@
 
     async initAudioContext() {
       const popupTab = await chrome.tabs.getCurrent();
-      chrome.tabCapture.getMediaStreamId(
-        { consumerTabId: popupTab?.id, targetTabId: this.currentTabId },
-        (streamId) => {
-          this.getMediaStream(streamId).then((stream) => {
-            const ctx = new AudioContext();
-            const source = ctx.createMediaStreamSource(stream);
-            this.gainNode = ctx.createGain();
-            source.connect(this.gainNode);
-            this.gainNode.connect(ctx.destination);
-          });
-        }
-      );
+      return new Promise((resolve) => {
+        chrome.tabCapture.getMediaStreamId(
+          { consumerTabId: popupTab?.id, targetTabId: this.currentTabId },
+          (streamId) => {
+            this.getMediaStream(streamId).then((stream) => {
+              const ctx = new AudioContext();
+              const source = ctx.createMediaStreamSource(stream);
+              this.gainNode = ctx.createGain();
+              source.connect(this.gainNode);
+              this.gainNode.connect(ctx.destination);
+              resolve();
+            });
+          }
+        );
+      });
     }
 
     getMediaStream(streamId) {
@@ -94,6 +118,7 @@
           ? 'Tabs playing audio right now'
           : 'No tabs playing audio right now';
 
+        this.tabsList.innerHTML = '';
         const template = document.querySelector('#template-tab');
         tabs.forEach((tab) => {
           if (!tab.favIconUrl || !tab.title) return;
@@ -108,7 +133,7 @@
 
     initListeners() {
       this.gainValueInput.addEventListener('input', (e) => this.handleGainChange(e));
-      document.getElementById('insite-controller').addEventListener('click', (e) => this.handleGainChangeButton(e));
+      document.getElementById('insite-controller').addEventListener('click', () => this.handleGainChangeButton());
       this.tabsList.addEventListener('click', (e) => this.handleTabListClick(e));
       document.documentElement.addEventListener('keypress', this.handleDocumentKeyPress);
     }
@@ -123,12 +148,11 @@
         const min = +this.gainValueInput.min;
         const max = +this.gainValueInput.max;
         if (volume < min || volume > max) return;
-
         this.gainValueInput.value = volume;
         this.volumeCurrent.textContent = volume;
         this.gainNode.gain.value = volume / 100;
         this.updateBadge(this.currentTabId, volume);
-        chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume }, () => { chrome.runtime.lastError; });
+        this.saveVolume(volume);
         return;
       }
 
@@ -140,7 +164,7 @@
       this.volumeCurrent.textContent = volume;
       this.gainNode.gain.value = volume / 100;
       this.updateBadge(this.currentTabId, volume);
-      chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume }, () => { chrome.runtime.lastError; });
+      this.saveVolume(volume);
     }
 
     handleGainChangeButton() {
@@ -149,7 +173,6 @@
       this.setVolumeValue(100);
       this.gainNode.gain.value = 1;
       this.updateBadge(this.currentTabId, 100);
-      chrome.tabs.sendMessage(this.currentTabId, { action: 'showGain', volume: 100 }, () => { chrome.runtime.lastError; });
     }
 
     updateBadge(tabId, volume) {
@@ -162,9 +185,9 @@
       if (!tab) return;
       const tabId = parseInt(tab.dataset.tabId, 10);
       chrome.tabs.update(tabId, { active: true }, (updatedTab) => {
+        if (!updatedTab) return;
         chrome.windows.update(updatedTab.windowId, { focused: true });
       });
     }
-
   };
 })();

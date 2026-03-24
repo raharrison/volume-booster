@@ -11,19 +11,22 @@ new class {
   }
 
   run() {
-    chrome.system.display.getInfo(null, (displays) => {
-      this.displayBounds = displays[0].bounds;
-    });
-
     chrome.action.onClicked.addListener(async (tab) => {
       if (!tab.id) return;
       await this.openOrFocusPopup(tab.id);
     });
 
-    chrome.tabs.onRemoved.addListener(() => {
-      chrome.tabs.query({ active: true }, (tabs) => {
-        if (chrome.runtime.lastError || !tabs[0]) return;
-        chrome.action.setBadgeText({ text: '', tabId: tabs[0].id });
+    chrome.tabs.onRemoved.addListener((tabId) => {
+      chrome.storage.local.remove([`popup_${tabId}`, `volume_${tabId}`]);
+    });
+  }
+
+  async getDisplayBounds() {
+    if (this.displayBounds) return this.displayBounds;
+    return new Promise((resolve) => {
+      chrome.system.display.getInfo(null, (displays) => {
+        this.displayBounds = displays[0].bounds;
+        resolve(this.displayBounds);
       });
     });
   }
@@ -39,8 +42,9 @@ new class {
       }
     }
 
+    const bounds = await this.getDisplayBounds();
     const popupWidth = navigator.platform.includes('Win') ? POPUP_WIDTH_WINDOWS : POPUP_WIDTH_OTHER;
-    const left = this.displayBounds.width - popupWidth - POPUP_RIGHT_MARGIN;
+    const left = bounds.width - popupWidth - POPUP_RIGHT_MARGIN;
 
     const newWindowId = await new Promise((resolve) => {
       chrome.windows.create({
