@@ -24,8 +24,7 @@
         .then(() => this.setVolumeValue(100))
         .then(() => this.initListeners())
         .then(() => this.showPlayingTabs())
-        .then(() => this.initStorage())
-        .then(() => this.changeHref());
+        .then(() => this.initStorage());
     }
 
     getStoredPopupId(tabId) {
@@ -84,22 +83,6 @@
     setVolumeValue(value) {
       this.gainValueInput.value = value;
       this.volumeCurrent.textContent = value;
-    }
-
-    changeHref() {
-      const brand = navigator.userAgentData.brands.find(
-        (b) => b.brand === 'Google Chrome' || b.brand === 'Microsoft Edge'
-      );
-      if (!brand) return;
-
-      let url;
-      if (brand.brand.match(/Edge/i)) {
-        url = 'https://microsoftedge.microsoft.com/addons/detail/' + chrome.runtime.id;
-      } else if (brand.brand.match(/Chrome/i)) {
-        url = 'https://chrome.google.com/webstore/detail/' + chrome.runtime.id + '/reviews';
-      }
-
-      if (url) document.querySelector('.link').setAttribute('href', url);
     }
 
     showPlayingTabs() {
