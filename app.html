@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" class="mdc-typography">
+
+<head>
+    <meta charset="utf-8">
+    <title>Volume Booster</title>
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link href="css/volume.css" rel="stylesheet">
+    <link href="css/switcher.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+    <header class="header">
+        <div class="form-check form-check-inline" style="position: absolute;top: 1.5em; right: 1em;">
+            <input class="form-check-input" type="checkbox" id="insite-controller" checked>
+        </div>
+        <!-- <div class="header__main-block">
+            <img class="header__icon" src="image/logo-name.png" alt="Volume Booster">
+        </div> -->
+        <div class="header__main-block">
+            <img class="header__icon__logo" src="image/icon.png" alt="Volume Booster">
+            <span class="header__icon__name">Volume Booster</span>
+        </div>
+        <div class="line"></div>
+        <span class="header__description">
+            Set a desired speaker volume level for current tab in your browser.
+        </span>
+    </header>
+
+    <div class="volume-container">
+        <input id="volume-slider" class="volume-slider__slider" type="range" value="100" min="0" max="600" step="10"
+            autofocus>
+        <section class="volume-info">
+            <span class="volume-info__volume-min">0 %</span>
+            <span class="volume-info-minus"></span>
+            <span class="volume-info__volume-current">
+                <span id="volume-current" class="volume-info__volume-current-value"></span>%
+            </span>
+            <span class="volume-info-plus"></span>
+            <span class="volume-info__volume-max">600 %</span>
+        </section>
+    </div>
+    <section class="tabs">
+        <div class="tabs__title"></div>
+        <div class="tabs__list"></div>
+    </section>
+
+    <footer class="footer">
+        <button class="link--external">
+            <a class="link" tabindex="-1" target="_blank" href="">
+                Please, rate us!
+            </a>
+        </button>
+    </footer>
+    <template id="template-tab">
+        <a href="#" class="tab">
+            <div class="tab__item tab__icon">
+                <img class="tab__icon-image" src="" alt="">
+            </div>
+            <div class="tab__item tab__title"></div>
+        </a>
+    </template>
+    <script src="js/view.js"></script>
+
+</body>
+
+</html>
