@@ -134,8 +134,17 @@
     initListeners() {
       this.gainValueInput.addEventListener('input', (e) => this.handleGainChange(e));
       document.getElementById('insite-controller').addEventListener('click', () => this.handleGainChangeButton());
+      document.getElementById('volume-reset').addEventListener('click', () => this.handleReset());
       this.tabsList.addEventListener('click', (e) => this.handleTabListClick(e));
       document.documentElement.addEventListener('keypress', this.handleDocumentKeyPress);
+    }
+
+    handleReset() {
+      const volume = 100;
+      this.setVolumeValue(volume);
+      this.gainNode.gain.value = volume / 100;
+      this.updateBadge(this.currentTabId, volume);
+      this.saveVolume(volume);
     }
 
     handleDocumentKeyPress(e) {
@@ -170,9 +179,14 @@
     handleGainChangeButton() {
       const slider = this.gainValueInput;
       slider.disabled = !slider.disabled;
-      this.setVolumeValue(100);
-      this.gainNode.gain.value = 1;
-      this.updateBadge(this.currentTabId, 100);
+      if (slider.disabled) {
+        this.gainNode.gain.value = 1;
+        this.updateBadge(this.currentTabId, 100);
+      } else {
+        const volume = parseInt(slider.value);
+        this.gainNode.gain.value = volume / 100;
+        this.updateBadge(this.currentTabId, volume);
+      }
     }
 
     updateBadge(tabId, volume) {

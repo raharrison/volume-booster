@@ -221,6 +221,28 @@ table {
   font-weight: 700;
 }
 
+.volume-reset-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+  margin-right: 20px;
+}
+
+#volume-reset {
+  background: none;
+  border: 1px solid #c5d8e8;
+  border-radius: 4px;
+  color: #809ca5;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 12px;
+}
+
+#volume-reset:hover {
+  border-color: #3598ff;
+  color: #3598ff;
+}
+
 .tabs__title {
   margin-bottom: 7px;
   text-align: center;
