@@ -49,7 +49,7 @@ new class {
     const newWindowId = await new Promise((resolve) => {
       chrome.windows.create({
         type: 'popup',
-        url: '/app.html?tabId=' + tabId,
+        url: '/popup.html?tabId=' + tabId,
         focused: true,
         height: POPUP_HEIGHT,
         width: popupWidth,
