@@ -9,9 +9,7 @@
       this.handleDocumentKeyPress = this.handleDocumentKeyPress.bind(this);
 
       chrome.tabs.onRemoved.addListener((tabId) => {
-        this.getStoredPopupId(tabId).then((windowId) => {
-          if (windowId) chrome.windows.remove(windowId);
-        });
+        if (tabId === this.currentTabId) { window.close(); return; }
         this.showPlayingTabs();
       });
 
@@ -40,33 +38,12 @@
       this.initSwitcher();
       return this.getCurrentTabId()
         .then(() => this.initAudioContext())
-        .then(() => this.getSavedVolume())
-        .then((volume) => {
-          this.setVolumeValue(volume);
-          this.gainNode.gain.value = volume / 100;
+        .then(() => {
+          this.setVolumeValue(100);
+          this.gainNode.gain.value = 1;
         })
         .then(() => this.initListeners())
         .then(() => this.showPlayingTabs());
-    }
-
-    getSavedVolume() {
-      return new Promise((resolve) => {
-        chrome.storage.local.get([`volume_${this.currentTabId}`], (result) => {
-          resolve(result[`volume_${this.currentTabId}`] ?? 100);
-        });
-      });
-    }
-
-    saveVolume(volume) {
-      chrome.storage.local.set({ [`volume_${this.currentTabId}`]: volume });
-    }
-
-    getStoredPopupId(tabId) {
-      return new Promise((resolve) => {
-        chrome.storage.local.get([`popup_${tabId}`], (result) => {
-          resolve(result[`popup_${tabId}`]);
-        });
-      });
     }
 
     getCurrentTabId() {
@@ -137,14 +114,13 @@
       document.getElementById('volume-reset').addEventListener('click', () => this.handleReset());
       this.tabsList.addEventListener('click', (e) => this.handleTabListClick(e));
       document.documentElement.addEventListener('keypress', this.handleDocumentKeyPress);
+      window.addEventListener('unload', () => this.clearBadge(this.currentTabId));
     }
 
     handleReset() {
-      const volume = 100;
-      this.setVolumeValue(volume);
-      this.gainNode.gain.value = volume / 100;
-      this.updateBadge(this.currentTabId, volume);
-      this.saveVolume(volume);
+      this.setVolumeValue(100);
+      this.gainNode.gain.value = 1;
+      this.clearBadge(this.currentTabId);
     }
 
     handleDocumentKeyPress(e) {
@@ -160,8 +136,7 @@
         this.gainValueInput.value = volume;
         this.volumeCurrent.textContent = volume;
         this.gainNode.gain.value = volume / 100;
-        this.updateBadge(this.currentTabId, volume);
-        this.saveVolume(volume);
+        volume === 100 ? this.clearBadge(this.currentTabId) : this.updateBadge(this.currentTabId, volume);
         return;
       }
 
@@ -172,8 +147,7 @@
       const volume = parseInt(e.target.value);
       this.volumeCurrent.textContent = volume;
       this.gainNode.gain.value = volume / 100;
-      this.updateBadge(this.currentTabId, volume);
-      this.saveVolume(volume);
+      volume === 100 ? this.clearBadge(this.currentTabId) : this.updateBadge(this.currentTabId, volume);
     }
 
     handleGainChangeButton() {
@@ -181,16 +155,20 @@
       slider.disabled = !slider.disabled;
       if (slider.disabled) {
         this.gainNode.gain.value = 1;
-        this.updateBadge(this.currentTabId, 100);
+        this.clearBadge(this.currentTabId);
       } else {
         const volume = parseInt(slider.value);
         this.gainNode.gain.value = volume / 100;
-        this.updateBadge(this.currentTabId, volume);
+        volume === 100 ? this.clearBadge(this.currentTabId) : this.updateBadge(this.currentTabId, volume);
       }
     }
 
     updateBadge(tabId, volume) {
       chrome.action.setBadgeText({ text: String(volume), tabId });
+    }
+
+    clearBadge(tabId) {
+      chrome.action.setBadgeText({ text: '', tabId });
     }
 
     handleTabListClick(e) {

@@ -166,15 +166,9 @@ table {
 }
 
 .line {
-  border-top: 0px solid #95b2bdbf;
   margin-right: 20px;
   margin-left: 20px;
   padding-bottom: 10px;
-}
-
-.volume-slider__slider {
-  background-color: #000;
-  width: 100%;
 }
 
 .volume-info {
@@ -319,7 +313,6 @@ body {
   margin-left: 1.5em;
   margin-right: 1.5em;
   border-radius: 5px;
-  background-repeat: no-repeat;
 }
 
 .volume-slider__slider::-webkit-slider-thumb {
